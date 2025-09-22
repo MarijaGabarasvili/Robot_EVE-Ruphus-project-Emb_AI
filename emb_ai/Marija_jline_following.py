@@ -18,7 +18,7 @@ mB.reset()
 
 
 #define speed and turn angles
-BASE_SPEED = 50
+BASE_SPEED = 100
 PROPORTIONAL_GAIN = 2
 
 
@@ -39,7 +39,7 @@ while not btn.any():
     # Read the reflected light intensity
     light_intensity = colorSensor.reflected_light_intensity
     # Calculate the deviation from the threshold
-    deviation = light_intensity - threshold
+    deviation =  light_intensity
 
     
     # Calculate turn rate using proportional control
@@ -49,15 +49,11 @@ while not btn.any():
     left_speed = BASE_SPEED + turn_rate
     right_speed = (BASE_SPEED - turn_rate)*1.2
     
-    display.clear()
-    display.text_pixels("For now its fine")
     
     # Set motor speeds
-    mA.run_forever(speed_sp=right_speed*(-1))
-    mB.run_forever(speed_sp=left_speed*(-1))
+    mA.run_forever(speed_sp=-right_speed)
+    mB.run_forever(speed_sp=-left_speed)
     
-    display.clear()
-    display.text_pixels("For now its fine")
     
     # Small delay to prevent excessive CPU usage
     time.sleep(0.01)
