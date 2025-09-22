@@ -50,7 +50,7 @@ while not btn.any():
     else:
         # Both on same color → go straight
         mA.run_forever(speed_sp=BASE_SPEED)
-        mB.run_forever(speed_sp=TURN_SPEED)
+        mB.run_forever(speed_sp=BASE_SPEED)
 
     time.sleep(0.01)
     
