@@ -2,7 +2,6 @@
 
 import ev3dev.ev3 as ev3
 import time 
-from ev3dev2.display import Display
 
 
 btn = ev3.Button()
@@ -10,8 +9,8 @@ btn = ev3.Button()
 #sensors and motors used
 mA = ev3.LargeMotor('outA')
 mB = ev3.LargeMotor('outD')
-colorSensor = ev3.ColorSensor('in1')
-display = Display()
+colorSensor_right = ev3.ColorSensor('in4')
+colorSensor_left = ev3.ColorSensor('in1')
 
 mA.reset()
 mB.reset()
@@ -19,7 +18,7 @@ mB.reset()
 
 #define speed and turn angles
 BASE_SPEED = 100
-PROPORTIONAL_GAIN = 2
+TURN_SPEED = 180      # Speed reduction when correcting
 
 
 #getting values of black and white from the color sensor
@@ -28,34 +27,31 @@ white = 50
 
 
 # Calculate threshold
-threshold = (black + white) / 2
-print("Threshold:", threshold)
+THRESHOLD = (black + white) / 2
+print("Threshold:", THRESHOLD)
 
 
-#Threshhold helps to find the middle point between black and white and will help in turning during line following
-# Should run until detects the object
-#For now until the button is pressed
+
 while not btn.any():
-    # Read the reflected light intensity
-    light_intensity = colorSensor.reflected_light_intensity
-    # Calculate the deviation from the threshold
-    deviation =  light_intensity
+    left_val = colorSensor_left.value()
+    right_val = colorSensor_right.value()
+    
+    mA.run_forever(speed_sp=BASE_SPEED)
+    mB.run_forever(speed_sp=BASE_SPEED)
 
-    
-    # Calculate turn rate using proportional control
-    turn_rate = PROPORTIONAL_GAIN * deviation    
-    
-    # Calculate motor speeds
-    left_speed = BASE_SPEED + turn_rate
-    right_speed = (BASE_SPEED - turn_rate)*1.2
-    
-    
-    # Set motor speeds
-    mA.run_forever(speed_sp=-right_speed)
-    mB.run_forever(speed_sp=-left_speed)
-    
-    
-    # Small delay to prevent excessive CPU usage
+    if left_val < THRESHOLD:
+        # Line is under left sensor → turn LEFT
+        mA.run_forever(speed_sp=BASE_SPEED)   # Right motor slower
+        mB.run_forever(speed_sp=TURN_SPEED)   # Left motor faster
+    if right_val < THRESHOLD :
+        # Line is under right sensor → turn RIGHT
+        mA.run_forever(speed_sp=TURN_SPEED)
+        mB.run_forever(speed_sp=BASE_SPEED)
+    else:
+        # Both on same color → go straight
+        mA.run_forever(speed_sp=BASE_SPEED)
+        mB.run_forever(speed_sp=TURN_SPEED)
+
     time.sleep(0.01)
     
 # Stop the motors
