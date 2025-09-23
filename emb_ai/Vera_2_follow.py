@@ -20,7 +20,7 @@ BLACK, WHITE = 5, 50
 THRESHOLD    = (BLACK + WHITE) / 2.0
 DETECT_MARG  = 8
 SEARCH_TURN  = 120
-GAP_TIMEOUT  = 0.35     # <== NEW: how long to keep going straight across a gap
+GAP_TIMEOUT  = 0.25     # <== NEW: how long to keep going straight across a gap
 
 # PID gains
 Kp, Ki, Kd = 4.0, 0.0, 1.2
