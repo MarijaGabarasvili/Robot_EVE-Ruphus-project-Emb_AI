@@ -1,0 +1,5 @@
+Bio inspired things in our ev3:
+
+1. One eye up one eye down like a bug
+2. Crab hand
+3. Snake movement on ramp
