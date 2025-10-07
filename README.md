@@ -3,9 +3,9 @@ LEGO Mindstorm project for Embodied AI class. The main task of the robot is to c
 
 ## PORTS FOR MOTORS AND SENSORS
 Sensors:
-in3 - ultrasonic sensor for can detection
-in4 - right color sensor for line detection
-in1 - left color sensor for line detetction
+in3 - ultrasonic sensor for can detection  
+in4 - right color sensor for line detection  
+in1 - left color sensor for line detetction  
 
 Motors:
 outA - left motor to drive
