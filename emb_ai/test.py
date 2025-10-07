@@ -10,15 +10,15 @@ ultrasonic = ev3.UltrasonicSensor('in3') # ultrasonic sensor
 sound = Sound()
 
 
-while ultrasonic.distance_centimeters > 20:
-    sound.speak("Can is not detected")
-    
-sound.speak("Can is detected")
 
-#maybe a setup for robot grabber
-# mG.stop_action = "coast" # gripper motor
-# mG.run_to_abs_pos(position_sp=1500, speed_sp=300) # open gripper
-# time.sleep(2)
-# mG.run_to_abs_pos(position_sp=-2000, speed_sp=300) # close gripper
-# time.sleep(2)
+# while True:
+#     sound.speak("Distance is " + str(ultrasonic.distance_centimeters) + " centimeters")
+#     time.sleep(0.5)
+
+# maybe a setup for robot grabber
+mG.stop_action = "coast" # gripper motor
+mG.run_to_abs_pos(position_sp=1500, speed_sp=300) # open gripper
+time.sleep(4)
+mG.run_to_abs_pos(position_sp=-2000, speed_sp=300) # close gripper
+time.sleep(3)
 
