@@ -2,15 +2,15 @@
 LEGO Mindstorm project for Embodied AI class. The main task of the robot is to climb the ramp following the ramp and retreat the object back from the second level of the ramp.
 
 ## PORTS FOR MOTORS AND SENSORS
-Sensors:
+Sensors:  
 in3 - ultrasonic sensor for can detection  
 in4 - right color sensor for line detection  
 in1 - left color sensor for line detetction  
 
-Motors:
-outA - left motor to drive
-outD - right motor to drive
-outC - gripper motor to get the obj
+Motors:  
+outA - left motor to drive  
+outD - right motor to drive  
+outC - gripper motor to get the obj  
 
 
 ## TO DO:
