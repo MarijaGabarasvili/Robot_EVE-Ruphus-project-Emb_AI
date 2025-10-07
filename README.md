@@ -1,9 +1,17 @@
 # Robot_EVE-Ruphus-project-Emb_AI
 LEGO Mindstorm project for Embodied AI class. The main task of the robot is to climb the ramp following the ramp and retreat the object back from the second level of the ramp.
 
-## Sensors used:
-1) Right color sensor for line detection
-2) Left color sensor for line detection
+## PORTS FOR MOTORS AND SENSORS
+Sensors:
+in3 - ultrasonic sensor for can detection
+in4 - right color sensor for line detection
+in1 - left color sensor for line detetction
+
+Motors:
+outA - left motor to drive
+outD - right motor to drive
+outC - gripper motor to get the obj
+
 
 ## TO DO:
 1) Implement code for line following✅
