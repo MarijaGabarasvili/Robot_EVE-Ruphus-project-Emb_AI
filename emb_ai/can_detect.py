@@ -61,13 +61,23 @@ def can_detect():
     mR.stop(stop_action="brake")
     sound.speak("Can detected")
 
+    # drive toward can
+    while ultrasonic.distance_centimeters > 5: # drive until 5 cm away from can
+        mL.run_forever(speed_sp=200)
+        mR.run_forever(speed_sp=200)
+    mL.stop(stop_action="brake")
+    mR.stop(stop_action="brake")
+    grab_can()
+
 def grab_can():
     sound.speak("Grabbing can")
     mG.run_to_abs_pos(position_sp=-2000, speed_sp=300) # close gripper
-    time.sleep(3)
+    time.sleep(5)
     sound.speak("Can grabbed")
-    
-    
+
+def move_back():
+    exec(open("final_line_follower.py").read())
+        
+
 can_detect()
-grab_can()
     
