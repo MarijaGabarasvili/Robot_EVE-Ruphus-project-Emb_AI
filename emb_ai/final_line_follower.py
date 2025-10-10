@@ -17,13 +17,13 @@ mL.reset(); mR.reset()
 # -------- Tuning --------
 BASE_SPEED   = 70           # forward speed
 MAX_SPEED    = 150           # clamp
-BLACK, WHITE = 5, 50         # quick manual calibration
+BLACK, WHITE = 10, 60         # quick manual calibration
 THRESHOLD    = (BLACK + WHITE) / 2.0
 DETECT_MARG  = 8             # how close to threshold counts as "on edge"
 SEARCH_TURN  = 120           # search spin speed
 
 # PID gains (start here)
-Kp, Ki, Kd   = 2.0, 0.0, 1.2
+Kp, Ki, Kd   = 2.5, 0.0, 1.0
 
 def clamp(v, lo, hi): return max(lo, min(hi, v))
 def set_speeds(l, r):
@@ -36,6 +36,12 @@ prev_err = 0.0
 prev_t   = time.time()
 
 print("Threshold:", THRESHOLD)
+
+#searching for line function to implement
+
+    
+
+
 
 try:
     while not btn.any():

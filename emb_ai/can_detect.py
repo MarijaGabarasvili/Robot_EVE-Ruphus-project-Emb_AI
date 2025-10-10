@@ -22,52 +22,28 @@ mG.stop_action = "coast" # it stops if there is resistance in motors
 mG.run_to_abs_pos(position_sp=1500, speed_sp=300) # open gripper
 time.sleep(4)
 
+distance_v = [] #list to store distances and than compare them  to find the smalest one, to center the car
+
 # Detecting can
 def can_detect():
     sound.speak("Searching for can")
-    can = False
-    #s_time = time.time()
-    #spin_duration = 2 # how much seconds to spin before moving forward
-    while not can:
-        # Firstly turn on 45 degrees one side to look for a can
-        mL.run_to_rel_pos(position_sp=100, speed_sp=100)
-        mR.run_to_rel_pos(position_sp=-100, speed_sp=100)
+    for i in range(-4, 5):
+        #turning from -90 to 90 degrees
+        mL.run_to_rel_pos(position_sp=i*90, speed_sp=100)
+        mR.run_to_rel_pos(position_sp=-i*90, speed_sp=100)
         mL.wait_while('running')
         mR.wait_while('running')
-        time.sleep(0.1) #moves forward for 2 seconds
-        if ultrasonic.distance_centimeters < 20:
-            can = True
-            break
-        # Turns theother side for 45 degrees to detect a can
-        mL.run_to_rel_pos(position_sp=-200, speed_sp=100)
-        mR.run_to_rel_pos(position_sp=100, speed_sp=100)
-        mL.wait_while('running')
-        mR.wait_while('running')
-        time.sleep(0.1) #moves forward for 0.1 seconds
-        if ultrasonic.distance_centimeters < 20:
-            can = True
-            break
-        # Turn back to the original position
-        mL.run_to_rel_pos(position_sp=100, speed_sp=100)
-        mR.run_to_rel_pos(position_sp=-100, speed_sp=100)
-        mL.wait_while('running')
-        mR.wait_while('running')
-        time.sleep(0.1) #moves forward for 0.1 seconds
-        mL.run_forever(speed_sp=200)
-        mR.run_forever(speed_sp=200)
-        time.sleep(2) # moves forward for 1 seconds
+        time.sleep(0.1)
+        
+        #measuring distance and adding to a list
+        dist = ultrasonic.distance_centimeters
+        distance_v.append(dist)
 
-    mL.stop(stop_action="brake")
-    mR.stop(stop_action="brake")
-    sound.speak("Can detected")
-
-    # drive toward can
-    while ultrasonic.distance_centimeters > 2: # drive until 2 cm away from can
-        mL.run_forever(speed_sp=100)
-        mR.run_forever(speed_sp=100)
-    mL.stop(stop_action="brake")
-    mR.stop(stop_action="brake")
-    grab_can()
+        #find the best step and best dist
+    b_step, b_dist = min(enumerate(distance_v), key=lambda x: x[1])
+    return b_step, b_dist
+        
+    
 
 def grab_can():
     sound.speak("Grabbing can")
@@ -77,10 +53,24 @@ def grab_can():
 
 def move_back():
     exec(open("final_line_follower.py").read())
-        
+
+def move_can():
+    step, dist = can_detect()
+    #turning to the can
+    mL.run_to_rel_pos(position_sp=step*90, speed_sp=100)
+    mR.run_to_rel_pos(position_sp=-step*90, speed_sp=100)
+    mL.wait_while('running')
+    mR.wait_while('running')
+    if dist > 8: # if dist is more than 8 cm, than move forward
+        time.sleep(0.5)
+        mL.run_forever(speed_sp=200)
+        mR.run_forever(speed_sp=200)
 
 try:
-    can_detect()
+    move_can() # searches for can and than moves to it
+    grab_can() #grabs can
+    #hope for the best
+    
 except KeyboardInterrupt:
     print("Stopping all motors...")
     for m in (mL, mR, mG):
