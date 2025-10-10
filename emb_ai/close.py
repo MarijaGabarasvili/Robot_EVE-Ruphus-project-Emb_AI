@@ -17,8 +17,7 @@ sound = Sound()
 
 # maybe a setup for robot grabber
 mG.stop_action = "coast" # gripper motor
-mG.run_to_abs_pos(position_sp=1500, speed_sp=300) # open gripper
-time.sleep(4)
+# mG.run_to_abs_pos(position_sp=1500, speed_sp=300) # open gripper
+# time.sleep(4)
 mG.run_to_abs_pos(position_sp=-2000, speed_sp=300) # close gripper
 time.sleep(3)
-
