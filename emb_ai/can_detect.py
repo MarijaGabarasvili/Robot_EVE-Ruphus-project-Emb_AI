@@ -30,8 +30,8 @@ def can_detect():
     #spin_duration = 2 # how much seconds to spin before moving forward
     while not can:
         # Firstly turn on 45 degrees one side to look for a can
-        mL.run_to_rel_pos(position_sp=100, speed_sp=200)
-        mR.run_to_rel_pos(position_sp=-100, speed_sp=200)
+        mL.run_to_rel_pos(position_sp=100, speed_sp=100)
+        mR.run_to_rel_pos(position_sp=-100, speed_sp=100)
         mL.wait_while('running')
         mR.wait_while('running')
         time.sleep(0.1) #moves forward for 2 seconds
@@ -39,8 +39,8 @@ def can_detect():
             can = True
             break
         # Turns theother side for 45 degrees to detect a can
-        mL.run_to_rel_pos(position_sp=-200, speed_sp=200)
-        mR.run_to_rel_pos(position_sp=100, speed_sp=200)
+        mL.run_to_rel_pos(position_sp=-200, speed_sp=100)
+        mR.run_to_rel_pos(position_sp=100, speed_sp=100)
         mL.wait_while('running')
         mR.wait_while('running')
         time.sleep(0.1) #moves forward for 0.1 seconds
@@ -48,23 +48,23 @@ def can_detect():
             can = True
             break
         # Turn back to the original position
-        mL.run_to_rel_pos(position_sp=100, speed_sp=200)
-        mR.run_to_rel_pos(position_sp=-100, speed_sp=200)
+        mL.run_to_rel_pos(position_sp=100, speed_sp=100)
+        mR.run_to_rel_pos(position_sp=-100, speed_sp=100)
         mL.wait_while('running')
         mR.wait_while('running')
         time.sleep(0.1) #moves forward for 0.1 seconds
         mL.run_forever(speed_sp=200)
         mR.run_forever(speed_sp=200)
-        time.sleep(1) # moves forward for 1 seconds
+        time.sleep(2) # moves forward for 1 seconds
 
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")
     sound.speak("Can detected")
 
     # drive toward can
-    while ultrasonic.distance_centimeters > 5: # drive until 5 cm away from can
-        mL.run_forever(speed_sp=200)
-        mR.run_forever(speed_sp=200)
+    while ultrasonic.distance_centimeters > 2: # drive until 2 cm away from can
+        mL.run_forever(speed_sp=100)
+        mR.run_forever(speed_sp=100)
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")
     grab_can()
@@ -79,5 +79,11 @@ def move_back():
     exec(open("final_line_follower.py").read())
         
 
-can_detect()
+try:
+    can_detect()
+except KeyboardInterrupt:
+    print("Stopping all motors...")
+    for m in (mL, mR, mG):
+        m.stop(stop_action='brake')
+    sound.speak("Emergency stop")
     
