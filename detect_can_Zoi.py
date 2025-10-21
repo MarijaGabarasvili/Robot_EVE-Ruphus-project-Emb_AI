@@ -19,9 +19,9 @@ sound = ev3.Sound()
 def open_gripper(x):
     gripper.run_to_rel_pos(position_sp=x, speed_sp=200, stop_action='hold')
     gripper.wait_while('running')
-    sound.speak('Gripper opened')
+    # sound.speak('Gripper opened')
     # sound.speak('Open pos: '+ str(gripper.position))
-    sleep(4)
+    # sleep(4)
     return
 
 
@@ -51,6 +51,17 @@ def close_gripper():
     sound.speak("Gripped")
     sleep(1)
     return
+
+
+# move forward to relative position
+def move_forward(cm, speed=100):
+    DEGREES_PER_CM = 20.45
+    rotation = cm * DEGREES_PER_CM
+    left_motor.run_to_rel_pos(position_sp=rotation, speed_sp=speed, stop_action="brake")
+    right_motor.run_to_rel_pos(position_sp=rotation, speed_sp=speed, stop_action="brake")
+    left_motor.wait_while('running')
+    right_motor.wait_while('running')
+
 
 # Function to rotate robot by a given angle (approximation)
 def rotate(angle_deg, speed):
@@ -89,7 +100,7 @@ def sweep(detection_distance, rotation, rotating_speed, sweep_time, found, ref_s
             sleep(1)
             # check if it found the obstacle or the wall
             if ref_search == False:
-                n = check_for_wall(15, 35)
+                n = check_for_wall(40, 35)
                 if n == 1:
                     sound.speak('wall!')
                     sleep(1)
@@ -122,7 +133,7 @@ def search_for_can(detection_distance, rotation, rotating_speed, sweep_time=2, r
             sleep(1)
             # check if it found the obstacle or the wall
             if ref_search == False:
-                n = check_for_wall(15, 35)
+                n = check_for_wall(40, 35)
                 sleep(1)
                 if n == 1:
                     sound.speak('wall!')
@@ -132,6 +143,7 @@ def search_for_can(detection_distance, rotation, rotating_speed, sweep_time=2, r
                     found = True
                     break
                 else:
+                    shift_direction(15, 40)
                     continue
             else:
                 found = True
@@ -190,45 +202,59 @@ def shift_direction(shift_rotation, rotating_speed):
 
 # detect wall function
 
-def check_for_wall(rotation, speed):
+def check_for_wall(scan_angle, speed):
     wall = -1
 
+    rotating_degrees = scan_angle/6
+
     # distance from the obstacle 
-    distance_center = round(us.value()/10)   
-    sleep(1.5)
+    distance_center = us.value()/10
+    sleep(1)
     # sound.speak('center' + str(distance_center))
     # sleep(4)
+
+    # rotate(-2*rotating_degrees, speed)
+    # for i in range(2):
+    #         # distance[i] = us.value()/10
+    #         # sleep(1)
+    #         distance_sum += us.value()/10
+    #         sleep(1)
+
+    #         rotate(2*rotating_degrees, speed)
+    #         sleep(1)
+    # distance_sum += us.value()/10
+    # sleep(1)
+    # distance_center = distance_sum/3
 
     # rotate few degrees left of the obstacle 
     # sound.speak('check left')
     # sleep(4)
-    rotate(-rotation, speed)
-    # sleep(1)
+    rotate(-scan_angle/2, speed)
+    distance_sum = 0
+    distance = [0,0,0,0,0,0,0]
+    for i in range(6):
+        distance[i] = us.value()/10
+        sleep(1)
+        distance_sum += distance[i]
 
-    distance_left = round(us.value()/10)
+        rotate(rotating_degrees, speed)
+        sleep(1)
+    distance_sum  += us.value()/10
+    sleep(1)
+
+    rotate(-scan_angle/2, speed)
     # sound.speak('left' + str(distance_left))
     # sleep(4)
 
-    # rotate few degrees right of the obstacle
-    # sound.speak('check right')
-    # sleep(4)
-    rotate(2*rotation, speed)
-    # sleep(1)
+    print(distance)
 
-    distance_right = round(us.value()/10)
-    # sound.speak('right' + str(distance_right))
-    # sleep(4)
+    av_distance = distance_sum/7
+    sound.speak('average' + str(round(av_distance)))
+    sleep(4)
 
-    # return to center
-    rotate(-rotation,speed)
-
-    av_distance = round((distance_left + distance_center + distance_right)/3)
-    # sound.speak('average' + str(av_distance))
-    # sleep(4)
-
-    if av_distance > (distance_center - 1) and av_distance < (distance_center + 1):
+    if av_distance > (distance_center - 2) and av_distance < (distance_center + 2):
         wall = 1
-    elif av_distance > (distance_center + 2):
+    elif av_distance > (distance_center + 3):
         wall = 0
     return wall
 
@@ -241,24 +267,27 @@ def main():
     # open gripper
     open_gripper(950)
 
-    sound.speak('Searching for can')
-    sleep(4)
+    # sound.speak('Searching for can')
+    # sleep(4)
 
     # Searching for can (rotating bigger angles)
-    if search_for_can(17, 12, 50, 1.5):
+    if search_for_can(20, 12, 50, 1.5):
         sleep(1) 
 
         # searching with smaller angles and slower (finer detection)
         sound.speak('Refine search')
         sleep(3)
-        search_for_can(15, -10, 25, 2, True)
+        search_for_can(16, -10, 25, 2, True)
 
         # Approach forward
-        while us.value() / 10 > 4:
+        while us.value() / 10 > 5:
             left_motor.run_forever(speed_sp=50)
             right_motor.run_forever(speed_sp=50)
         left_motor.stop()
         right_motor.stop()
+
+        search_for_can(5, -10, 18, 2, True)
+        move_forward(2, 40)
 
         # Close gripper
         close_gripper()
