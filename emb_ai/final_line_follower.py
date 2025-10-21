@@ -2,6 +2,7 @@
 # EV3dev (ev3dev.ev3) dual-sensor PID line follower
 import ev3dev.ev3 as ev3
 import time
+import subprocess
 
 # -------- Hardware --------
 btn = ev3.Button()
@@ -21,8 +22,8 @@ print("Left:", csL.value(), "Right:", csR.value())
 # -------- Tuning --------
 BASE_SPEED   = 70           # forward speed
 MAX_SPEED    = 150           # clamp
-BLACK, WHITE = 10, 60         # quick manual calibration
-THRESHOLD    = (BLACK + WHITE) / 2.0
+BLACK, WHITE = 10, 50         # quick manual calibration
+THRESHOLD    = (BLACK + WHITE) / 4.0
 DETECT_MARG  = 15            # how close to threshold counts as "on edge"
 SEARCH_TURN  = 120           # search spin speed
 
@@ -38,6 +39,8 @@ mode = "right"      # "right" or "left" (which edge we follow)
 integral = 0.0
 prev_err = 0.0
 prev_t   = time.time()
+off_l = None
+line = True
 
 print("Threshold:", THRESHOLD)
 
@@ -48,24 +51,25 @@ print("Threshold:", THRESHOLD)
 
 
 try:
-    while not btn.any():
+    while line:
         t  = time.time()
         dt = max(1e-3, t - prev_t)
 
         vL = csL.value()
         vR = csR.value()
+        
 
         # Decide which sensor to follow
         left_on  = (vL < THRESHOLD + DETECT_MARG)
         right_on = (vR < THRESHOLD + DETECT_MARG)
 
-        if vL<vR:
+        if left_on and not right_on:
+            mode = "left"
+        elif right_on and not left_on:
             mode = "right"
         else:
-            mode = "left"
-        # if both or none -> keep previous mode
-
-
+            mode = mode
+                
 
         # Compute PID using the active sensor
         if mode == "right":
@@ -86,12 +90,14 @@ try:
         # If neither sensor sees the line, gently search toward last side
         neither_on = (not left_on and not right_on)
         if neither_on:
-            if mode == "right":
-                set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
-            else:
-                set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
-            integral = 0.0; prev_err = 0.0
+            if off_l is None:
+                off_l = time.time()
+            elif time.time() - off_l > 2:
+                set_speeds(0,0)
+                break
+                
         else:
+            off_l = None
             set_speeds(left_cmd, right_cmd)
 
         prev_err = err
