@@ -177,17 +177,6 @@ def search_for_can(detection_distance, rotation, rotating_speed, sweep_time=2, r
     return found
 
 
-# Search in one direction
-
-def search_one_direction(detection_distance, rotation, rotating_speed, sweep_time=2):
-    found = False
-
-    # Sweep in one direction (depending on rotation sign in the input)
-    found = sweep(detection_distance, rotation, rotating_speed, sweep_time, found)
-
-    return found
-
-
 # Shift direction 
 
 def shift_direction(shift_rotation, rotating_speed):
@@ -246,7 +235,7 @@ def check_for_wall(scan_angle, speed):
 def main():
 
     # the gripper needs to be initially CLOSED
-    
+
     # setting closed position as the starting reference position of the gripper
     gripper.reset()
 
