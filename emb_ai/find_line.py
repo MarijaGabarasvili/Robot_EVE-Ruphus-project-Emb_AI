@@ -58,8 +58,8 @@ while True:
     if left_on or right_on:
         break
         
-    mL.run_forever(speed_sp=-BASE_SPEED)
-    mR.run_forever(speed_sp=-BASE_SPEED)
+    mL.run_forever(speed_sp=BASE_SPEED)
+    mR.run_forever(speed_sp=BASE_SPEED)
     time.sleep(1.5)
         
     if left_on or right_on:
