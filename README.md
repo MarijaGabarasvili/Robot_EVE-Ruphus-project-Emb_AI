@@ -19,7 +19,7 @@ outC - gripper motor to get the obj
 4) Add sensor for object detection and to measure how far the object is✅
 5) Search for can and drive towards it✅
 6) Grabing can✅
-7) Getting back on line
+7) Getting back on line✅
 8) Ramp climbing
 
 ## Problems which we found:
