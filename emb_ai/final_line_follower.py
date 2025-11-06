@@ -19,6 +19,7 @@ mR.stop(stop_action="brake")
 print("Left:", csL.value(), "Right:", csR.value())
 
 # -------- Tuning --------
+<<<<<<< HEAD
 BASE_SPEED = 70           # forward speed
 MAX_SPEED = 150           # clamp
 BLACK, WHITE = 10, 50     # quick manual calibration
@@ -31,6 +32,17 @@ Kp, Ki, Kd = 2.5, 0.0, 1.0
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
+=======
+BASE_SPEED   = 85           # forward speed
+MAX_SPEED    = 150           # clamp
+BLACK, WHITE = 10, 50         # quick manual calibration
+THRESHOLD    = (BLACK + WHITE) / 4.0
+DETECT_MARG  = 15            # how close to threshold counts as "on edge"
+SEARCH_TURN  = 120           # search spin speed
+
+# PID gains (start here)
+Kp, Ki, Kd   = 4, 0.02, 1.8
+>>>>>>> 84d129eab3e5ed883a5a6ddd995d2e4b88d0ba7e
 
 def set_speeds(l, r):
     mL.run_forever(speed_sp=clamp(int(l), -MAX_SPEED, MAX_SPEED))
