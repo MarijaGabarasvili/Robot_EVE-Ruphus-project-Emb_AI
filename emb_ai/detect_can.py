@@ -96,14 +96,14 @@ def sweep(detection_distance, rotation, rotating_speed, sweep_time, found, ref_s
         if distance_cm <= detection_distance:
             left_motor.stop()
             right_motor.stop()
-            sound.speak('Detection!')
-            sleep(1)
+            # sound.speak('Detection!')
+            # sleep(1)
             # check if it found the object or the wall
             if ref_search == False:
                 n = check_for_wall(40, 35)
                 if n == 1:
-                    sound.speak('wall!')
-                    sleep(1)
+                    # sound.speak('wall!')
+                    # sleep(1)
                     shift_direction(-90, 40)
                     break
                 elif n == 0:
@@ -129,15 +129,15 @@ def search_for_can(detection_distance, rotation, rotating_speed, sweep_time=2, r
         if distance_cm <= detection_distance:
             left_motor.stop()
             right_motor.stop()
-            sound.speak('Detection!')
-            sleep(1)
+            # sound.speak('Detection!')
+            # sleep(1)
             # check if it found the obstacle or the wall
             if ref_search == False:
                 n = check_for_wall(40, 35)
-                sleep(1)
+                # sleep(1)
                 if n == 1:
-                    sound.speak('wall!')
-                    sleep(1)
+                    # sound.speak('wall!')
+                    # sleep(1)
                     shift_direction(-90, 40)
                 elif n == 0:
                     found = True
@@ -235,7 +235,7 @@ def check_for_wall(scan_angle, speed):
 def main():
 
     # the gripper needs to be initially CLOSED
-
+ 
     # setting closed position as the starting reference position of the gripper
     gripper.reset()
 
@@ -250,8 +250,8 @@ def main():
         sleep(1) 
 
         # searching with smaller angles and slower (finer detection)
-        sound.speak('Refine search')
-        sleep(3)
+        # sound.speak('Refine search')
+        # sleep(3)
         search_for_can(16, -10, 25, 2, True)
 
         # Approach forward

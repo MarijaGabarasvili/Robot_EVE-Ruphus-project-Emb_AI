@@ -15,25 +15,40 @@ csL.mode = 'COL-REFLECT'
 mL.stop(stop_action="brake")
 mR.stop(stop_action="brake")
 
+
+ 
+
 BLACK, WHITE = 10, 50
 THRESHOLD    = (BLACK + WHITE) / 4.0
 DETECT_MARG  = 15 
 BASE_SPEED   = 70   
 
+vL = csL.value()
+vR = csR.value()
+    
+left_on  = (vL < THRESHOLD + DETECT_MARG)
+right_on = (vR < THRESHOLD + DETECT_MARG)
 
-while True:
+while not (left_on or right_on):
     
     vL = csL.value()
     vR = csR.value()
     
     left_on  = (vL < THRESHOLD + DETECT_MARG)
     right_on = (vR < THRESHOLD + DETECT_MARG)
-        
+    
+    
     mL.run_to_rel_pos(position_sp=60, speed_sp=BASE_SPEED)
     mR.run_to_rel_pos(position_sp=-60, speed_sp=BASE_SPEED)
     mL.wait_while('running')
     mR.wait_while('running')
     time.sleep(1.5)
+    
+    vL = csL.value()
+    vR = csR.value()
+    
+    left_on  = (vL < THRESHOLD + DETECT_MARG)
+    right_on = (vR < THRESHOLD + DETECT_MARG)
         
     if left_on or right_on:
         break
@@ -44,6 +59,12 @@ while True:
     mL.wait_while('running')
     mR.wait_while('running')
     time.sleep(1.5)
+    
+    vL = csL.value()
+    vR = csR.value()
+    
+    left_on  = (vL < THRESHOLD + DETECT_MARG)
+    right_on = (vR < THRESHOLD + DETECT_MARG)
         
     if left_on or right_on:
         break
