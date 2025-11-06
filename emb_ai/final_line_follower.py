@@ -20,7 +20,7 @@ print("Left:", csL.value(), "Right:", csR.value())
 
 
 # -------- Tuning --------
-BASE_SPEED   = 70           # forward speed
+BASE_SPEED   = 85           # forward speed
 MAX_SPEED    = 150           # clamp
 BLACK, WHITE = 10, 50         # quick manual calibration
 THRESHOLD    = (BLACK + WHITE) / 4.0
@@ -28,7 +28,7 @@ DETECT_MARG  = 15            # how close to threshold counts as "on edge"
 SEARCH_TURN  = 120           # search spin speed
 
 # PID gains (start here)
-Kp, Ki, Kd   = 2.5, 0.0, 1.0
+Kp, Ki, Kd   = 4, 0.02, 1.8
 
 def clamp(v, lo, hi): return max(lo, min(hi, v))
 def set_speeds(l, r):
