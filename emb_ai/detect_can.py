@@ -47,7 +47,7 @@ def close_gripper():
             break
 
     gripper.stop()
-    sound.speak("Gripped")
+    # sound.speak("Gripped")
     sleep(1)
     return
 
@@ -242,7 +242,7 @@ def main():
     # open gripper
     open_gripper(950)
 
-    sound.speak('Searching for can')
+    # sound.speak('Searching for can')
     sleep(4)
 
     # Searching for can (rotating bigger angles)
