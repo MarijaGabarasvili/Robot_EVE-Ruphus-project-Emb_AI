@@ -20,7 +20,7 @@ print("Left:", csL.value(), "Right:", csR.value())
 
 
 # -------- Tuning --------
-BASE_SPEED   = 85          # forward speed
+BASE_SPEED   = 70           # forward speed
 MAX_SPEED    = 150           # clamp
 BLACK, WHITE = 10, 50         # quick manual calibration
 THRESHOLD    = (BLACK + WHITE) / 4.0
@@ -28,7 +28,7 @@ DETECT_MARG  = 15            # how close to threshold counts as "on edge"
 SEARCH_TURN  = 120           # search spin speed
 
 # PID gains (start here)
-Kp, Ki, Kd   = 4, 0.02, 1.8
+Kp, Ki, Kd   = 2.5, 0.0, 1.0
 
 def clamp(v, lo, hi): return max(lo, min(hi, v))
 def set_speeds(l, r):
@@ -92,7 +92,23 @@ try:
         if neither_on:
             if off_l is None:
                 off_l = time.time()
-            elif time.time() - off_l > 1:
+                # Initialize search phase tracking
+                search_start_l = time.time() # Start time of the left turn phase
+                search_phase = "left" # Start with the left turn
+
+            elapsed_off = time.time() - off_l
+
+            if elapsed_off < 2:
+                if search_phase == "left":
+                    # Turn left for the first second
+                    set_speeds(-SEARCH_TURN, SEARCH_TURN) # Left spin
+                    if time.time() - search_start_l >= 1:
+                        search_phase = "right" # Switch to right turn after 1 second
+                elif search_phase == "right":
+                    # Turn right until 2 seconds are up or line is found
+                    set_speeds(SEARCH_TURN, -SEARCH_TURN) # Right spin
+            else:
+                # Stop and break after 2 seconds total search time
                 set_speeds(0,0)
                 break
                 

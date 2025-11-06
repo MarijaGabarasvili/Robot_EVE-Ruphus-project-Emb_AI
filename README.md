@@ -16,10 +16,10 @@ outC - gripper motor to get the obj
 1) Implement code for line following✅
 2) Test on the track✅  
 3) Submit the 1 check in by Thursday✅
-4) Add sensor for object detection and to measure how far the object is
-5) Search for can and drive towards it
-6) Grabing can
-7) Getting back on line
+4) Add sensor for object detection and to measure how far the object is✅
+5) Search for can and drive towards it✅
+6) Grabing can✅
+7) Getting back on line✅
 8) Ramp climbing
 
 ## Problems which we found:
