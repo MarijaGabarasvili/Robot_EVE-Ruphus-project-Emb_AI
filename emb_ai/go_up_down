@@ -5,39 +5,66 @@ import time
 mL = ev3.LargeMotor('outA')
 mR = ev3.LargeMotor('outD')
 gyro = ev3.GyroSensor('in2')
+gyro.mode = 'GYRO-RATE'
+time.sleep(0.5)
 gyro.mode = 'GYRO-ANG'
 
-BASE_SPEED = 100
-BOOST_SPEED = 900
+BASE_SPEED = 200
+BOOST_SPEED = 500
 STOP_SPEED = -200
-ANGLE_THRESHOLD = 2  # degrees
-FLAT_THRESHOLD = 0  # degrees
-TIMEOUT = 30
+ANGLE_THRESHOLD = 10  # degrees
+TIMEOUT = 100
 
-start_time = time.time()
+try:
+    start_time = time.time()
+    zero_angle = gyro.value()  # initial angle
+    print("Zero Angle:", zero_angle)
+    time.sleep(2)
 
-while time.time() - start_time < TIMEOUT:
-    angle = gyro.value()   # degrees from starting angle
-    print("Angle:", angle)
+    while time.time() - start_time < TIMEOUT:
+        angle = gyro.value()   # degrees from starting angle
+        print("Current Angle:", angle)
+        time.sleep(2)
 
-    # If tilted upward → ramp
-    if angle < :
-        speed = STOP_SPEED
-    else:
-        speed = BASE_SPEED
-    if angle > :
-        speed = BOOST_SPEED
+        # If tilted upward → ramp
+        # This works with a small ramp
+        if angle < 0 and angle > -30:
+            mL.run_forever(speed_sp=BOOST_SPEED)
+            mR.run_forever(speed_sp=BOOST_SPEED)
+            time.sleep(0.3)  # brief boost
+            mL.run_forever(speed_sp=BASE_SPEED)
+            mR.run_forever(speed_sp=BASE_SPEED)
+            
+        elif angle > 0:
+            mL.run_forever(speed_sp=STOP_SPEED)
+            mR.run_forever(speed_sp=STOP_SPEED)
+            time.sleep(0.3)  # brief reverse to counteract climb
+            mL.run_forever(speed_sp=-BASE_SPEED)
+            mR.run_forever(speed_sp=-BASE_SPEED)
+        elif angle <  -30:
+            speed = BOOST_SPEED*2
+            mL.run_forever(speed_sp=speed)
+            mR.run_forever(speed_sp=speed)
+            time.sleep(0.3)  # extra boost for steep descent
+            mL.run_forever(speed_sp=BASE_SPEED)
+            mR.run_forever(speed_sp=BASE_SPEED)
+        else:
+            speed = BASE_SPEED
+        
 
-    mL.run_forever(speed_sp=speed)
-    mR.run_forever(speed_sp=speed)
+        mL.run_forever(speed_sp=speed)
+        mR.run_forever(speed_sp=speed)
+
+except KeyboardInterrupt:
+    print("\nStopped by user (Ctrl+C).")
 
     # Stop if flat again (after climbing)
-    if angle < FLAT_THRESHOLD and time.time() - start_time > 3:
-        break
+    # if angle < FLAT_THRESHOLD and time.time() - start_time > 3:
+    #     break
+finally:
+    mL.stop(stop_action='brake')
+    mR.stop(stop_action='brake')
 
-    time.sleep(0.05)
 
-mL.stop(stop_action='brake')
-mR.stop(stop_action='brake')
 
 
