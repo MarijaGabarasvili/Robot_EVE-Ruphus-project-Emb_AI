@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import ev3dev.ev3 as ev3
+import time
+
+mL = ev3.LargeMotor('outA')
+mR = ev3.LargeMotor('outD')
+gyro = ev3.GyroSensor('in2')
+gyro.mode = 'GYRO-ANG'
+
+BASE_SPEED = 100
+BOOST_SPEED = 900
+STOP_SPEED = -200
+ANGLE_THRESHOLD = 2  # degrees
+FLAT_THRESHOLD = 0  # degrees
+TIMEOUT = 30
+
+start_time = time.time()
+
+while time.time() - start_time < TIMEOUT:
+    angle = gyro.value()   # degrees from starting angle
+    print("Angle:", angle)
+
+    # If tilted upward → ramp
+    if angle < :
+        speed = STOP_SPEED
+    else:
+        speed = BASE_SPEED
+    if angle > :
+        speed = BOOST_SPEED
+
+    mL.run_forever(speed_sp=speed)
+    mR.run_forever(speed_sp=speed)
+
+    # Stop if flat again (after climbing)
+    if angle < FLAT_THRESHOLD and time.time() - start_time > 3:
+        break
+
+    time.sleep(0.05)
+
+mL.stop(stop_action='brake')
+mR.stop(stop_action='brake')
+
+
