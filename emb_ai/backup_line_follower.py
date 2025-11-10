@@ -8,7 +8,7 @@ btn = ev3.Button()
 mL = ev3.LargeMotor('outA')      # left motor
 mR = ev3.LargeMotor('outD')      # right motor
 # Fontos: ellenőriztem a szenzor portokat, hogy megegyezzenek a motorokkal
-csR = ev3.ColorSensor('in4')     # right sensor (IN4-et használja)
+csR = ev3.ColorSensor('in2')     # right sensor (IN4-et használja)
 csL = ev3.ColorSensor('in1')     # left sensor (IN1-et használja)
 csR.mode = 'COL-REFLECT'
 csL.mode = 'COL-REFLECT'
@@ -32,15 +32,17 @@ THRESHOLD_R = (BLACK_R + WHITE_R) / 2.0  # Jobb szenzor célértéke
 DETECT_MARG = 5                  # how close to threshold counts as "on edge"
 SEARCH_TURN = 120                # search spin speed
 
+POLARITY = -1 #motors are reversed
+
 # PID gains
-Kp, Ki, Kd = 0.5, 0.0, 1.0
+Kp, Ki, Kd = 2.5, 0.0, 1.0
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
 
 def set_speeds(l, r):
-    mL.run_forever(speed_sp=clamp(int(l), -MAX_SPEED, MAX_SPEED))
-    mR.run_forever(speed_sp=clamp(int(r), -MAX_SPEED, MAX_SPEED))
+    mL.run_forever(speed_sp=clamp(int(l*POLARITY), -MAX_SPEED, MAX_SPEED))
+    mR.run_forever(speed_sp=clamp(int(r*POLARITY), -MAX_SPEED, MAX_SPEED))
 
 mode = "right"    # "right" or "left" (which edge we follow)
 integral = 0.0
@@ -99,18 +101,18 @@ try:
 
         # If neither sensor sees the line, gently search toward last side
         neither_on = (not left_on and not right_on)
+        #Test thsi part
         if neither_on:
+            if off_l is None:
+                off_l = time.time()
             if mode == "right":
                 set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
             else:
                 set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
             integral = 0.0
             prev_err = 0.0
-            if off_l is None:
-                off_l = time.time()
-            elapsed_off = time.time() - off_l
-            if elapsed_off > 5.0:
-                print("Line lost for 5 seconds, stopping.")
+            if (time.time() - off_l) > 3.0:
+                print("Line lost, stopping")
                 break
         else:
             set_speeds(left_cmd, right_cmd)
