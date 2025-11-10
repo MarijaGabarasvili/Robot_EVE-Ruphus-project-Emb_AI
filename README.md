@@ -4,8 +4,9 @@ LEGO Mindstorm project for Embodied AI class. The main task of the robot is to c
 ## PORTS FOR MOTORS AND SENSORS
 Sensors:  
 in3 - ultrasonic sensor for can detection  
-in4 - right color sensor for line detection  
-in1 - left color sensor for line detetction  
+in2 - right color sensor for line detection  
+in1 - left color sensor for line detetction 
+in4 - gyro sensor for turning
 
 Motors:  
 outA - left motor to drive  
@@ -24,8 +25,7 @@ outC - gripper motor to get the obj
 
 ## Problems which we found:
 * The final_line_follower.py is not working anymore (check after dealing with ramp)
-* The speed on mR is now 6 and mL is now 13
 
 ## The process:
-1. Line following task is compleatedusing the PID technique. During the developing fase it was deided to switch from 1 color sensor to 2 for stability and more smooth line following. The design of the RobotEVE/Ruphus also was changed, cause the position of sensors was stopping him from climbing up the ramp.
+1. Line following task is compleated using the PID technique. During the developing fase it was deided to switch from 1 color sensor to 2 for stability and more smooth line following. The design of the RobotEVE/Ruphus also was changed, cause the position of sensors was stopping him from climbing up the ramp.
 2. The design of RobotEVE/Ruphus was updated once again, so all the sensors could fit. The gripper was also changed according to the task and now resambles the crab hand. According to the testing the sensors and the hand should not stop it from going on the ramp. Main task was to implement the can detetction and grasping. 
