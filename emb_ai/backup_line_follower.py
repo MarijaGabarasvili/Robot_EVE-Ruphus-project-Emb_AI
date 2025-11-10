@@ -106,6 +106,12 @@ try:
                 set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
             integral = 0.0
             prev_err = 0.0
+            if off_l is None:
+                off_l = time.time()
+            elapsed_off = time.time() - off_l
+            if elapsed_off > 5.0:
+                print("Line lost for 5 seconds, stopping.")
+                break
         else:
             set_speeds(left_cmd, right_cmd)
 
