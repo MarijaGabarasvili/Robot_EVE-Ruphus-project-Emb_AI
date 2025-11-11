@@ -8,7 +8,7 @@ btn = ev3.Button()
 mL = ev3.LargeMotor('outA')      # left motor
 mR = ev3.LargeMotor('outD')      # right motor
 # Fontos: ellenőriztem a szenzor portokat, hogy megegyezzenek a motorokkal
-csR = ev3.ColorSensor('in4')     # right sensor (IN4-et használja)
+csR = ev3.ColorSensor('in2')     # right sensor (IN2-et használja)
 csL = ev3.ColorSensor('in1')     # left sensor (IN1-et használja)
 csR.mode = 'COL-REFLECT'
 csL.mode = 'COL-REFLECT'
@@ -33,14 +33,14 @@ DETECT_MARG = 5                  # how close to threshold counts as "on edge"
 SEARCH_TURN = 120                # search spin speed
 
 # PID gains
-Kp, Ki, Kd = 0.5, 0.0, 1.0
+Kp, Ki, Kd = -0.5, 0.0, -1.0
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
 
 def set_speeds(l, r):
-    mL.run_forever(speed_sp=clamp(int(l), -MAX_SPEED, MAX_SPEED))
-    mR.run_forever(speed_sp=clamp(int(r), -MAX_SPEED, MAX_SPEED))
+    mL.run_forever(speed_sp=clamp(int(l*(-1.0)), -MAX_SPEED, MAX_SPEED))
+    mR.run_forever(speed_sp=clamp(int(r*(-1.0)), -MAX_SPEED, MAX_SPEED))
 
 mode = "right"    # "right" or "left" (which edge we follow)
 integral = 0.0
