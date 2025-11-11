@@ -16,7 +16,7 @@ mL.reset()
 mR.reset()
 
 # -------- Base tuning --------
-BASE_SPEED = 150                  # base forward speed
+BASE_SPEED = 250                  # base forward speed
 MAX_SPEED  = 150                  # maximum motor speed
 
 # --- Independent calibration values ---
@@ -37,7 +37,7 @@ Kp, Ki, Kd = -0.5, 0.0, -1.0
 # When the line is lost → slower updates (to save CPU and prevent jitter)
 TRACK_SLEEP        = 0.02   # sampling interval when on the line
 LOST_SLEEP_START   = 0.12   # starting delay when line is first lost
-LOST_SLEEP_MAX     = 0.50   # maximum delay when line is lost for a long time
+LOST_SLEEP_MAX     = 0.75   # maximum delay when line is lost for a long time
 LOST_BACKOFF_RATE  = 0.05   # how fast the delay increases per second
 
 def clamp(v, lo, hi):
@@ -100,7 +100,7 @@ try:
             u = Kp * err + Ki * integral + Kd * deriv
 
             left_cmd  = BASE_SPEED + u
-            right_cmd = BASE_SPEED - u
+            right_cmd = BASE_SPEED  - u
             set_speeds(left_cmd, right_cmd)
 
             # Reset the "line lost" timer and use fast sampling
