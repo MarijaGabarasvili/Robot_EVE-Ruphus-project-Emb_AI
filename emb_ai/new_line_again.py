@@ -30,7 +30,7 @@ THRESHOLD_R = (BLACK_R + WHITE_R) / 2.0
 POLARITY = -1 # motors are reversed
 
 # PID gains
-Kp, Ki, Kd = 2.5, 0.0, 1.0
+Kp, Ki, Kd = -2.5, 0.0, -1.0
 
 # --- Dotted Line Tuning ---
 SEARCH_TURN    = 120    # search spin speed
