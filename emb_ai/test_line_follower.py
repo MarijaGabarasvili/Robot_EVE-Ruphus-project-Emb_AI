@@ -41,7 +41,7 @@ CORNER_TURN_DURATION = 0.5 # How long to force a sharp turn after corner is conf
 # When the line is lost → slower updates (to save CPU and prevent jitter)
 TRACK_SLEEP        = 0.02   # sampling interval when on the line
 LOST_SLEEP_START   = 0.12   # starting delay when line is first lost
-LOST_SLEEP_MAX     = 0.50   # maximum delay when line is lost for a long time
+LOST_SLEEP_MAX     = 0.75   # maximum delay when line is lost for a long time
 LOST_BACKOFF_RATE  = 0.05   # how fast the delay increases per second
 
 def clamp(v, lo, hi):
@@ -160,7 +160,7 @@ try:
             deriv = (err - prev_err) / dt
             u = Kp * err + Ki * integral + Kd * deriv
 
-            left_cmd = BASE_SPEED + u
+            left_cmd  = BASE_SPEED + u
             right_cmd = BASE_SPEED - u
             set_speeds(left_cmd, right_cmd)
 
