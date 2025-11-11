@@ -8,7 +8,7 @@ btn = ev3.Button()
 mL = ev3.LargeMotor('outA')      # left motor
 mR = ev3.LargeMotor('outD')      # right motor
 # Fontos: ellenőriztem a szenzor portokat, hogy megegyezzenek a motorokkal
-csR = ev3.ColorSensor('in4')     # right sensor (IN4-et használja)
+csR = ev3.ColorSensor('in2')     # right sensor (IN4-et használja)
 csL = ev3.ColorSensor('in1')     # left sensor (IN1-et használja)
 csR.mode = 'COL-REFLECT'
 csL.mode = 'COL-REFLECT'
