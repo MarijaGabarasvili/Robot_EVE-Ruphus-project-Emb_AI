@@ -35,7 +35,7 @@ SEARCH_TURN = 120                # search spin speed
 POLARITY = -1 #motors are reversed
 
 # PID gains
-Kp, Ki, Kd = 2.0, 0.01, 0.8
+Kp, Ki, Kd = -2.0, -0.01, -0.8
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
@@ -115,7 +115,7 @@ try:
 
         prev_err = err
         prev_t = t
-        time.sleep(0.45)
+        time.sleep(0.35)
 finally:
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")

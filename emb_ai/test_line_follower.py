@@ -35,7 +35,7 @@ SEARCH_TIME_LIMIT = 4.0          # maximum search time in seconds
 SEARCH_TURN_DURATION = 2.0      # duration to turn in one direction during search
 
 # PID gains
-Kp, Ki, Kd = 0.5, 0.0, 1.0
+Kp, Ki, Kd = -2.5, 0.0, -1.0
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
@@ -130,7 +130,7 @@ try:
 
         prev_err = err
         prev_t = t
-        time.sleep(0.5)
+        time.sleep(0.35)
 
 finally:
     off_l = None # Clearing search timer
