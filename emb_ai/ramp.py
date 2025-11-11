@@ -12,7 +12,7 @@ mR = ev3.LargeMotor('outD')     # right motor
 
 BASE_SPEED = 150
 UP_SPEED = 300
-DOWN_SPEED = 50
+DOWN_SPEED = 120
 POLARITY = -1
 ANGLE_THRESHOLD = 10  # degrees
 start = time.time()

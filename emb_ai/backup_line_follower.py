@@ -115,7 +115,7 @@ try:
 
         prev_err = err
         prev_t = t
-        time.sleep(0.35)
+        time.sleep(0.35 )
 finally:
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")
