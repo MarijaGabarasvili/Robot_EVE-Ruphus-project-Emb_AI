@@ -8,8 +8,8 @@ import subprocess
 btn = ev3.Button()
 mL  = ev3.LargeMotor('outA')      # left motor
 mR  = ev3.LargeMotor('outD')      # right motor
-csR = ev3.ColorSensor('in1')      # right sensor
-csL = ev3.ColorSensor('in4 ')      # left sensor
+csR = ev3.ColorSensor('in2')      # right sensor
+csL = ev3.ColorSensor('in1 ')      # left sensor
 csR.mode = 'COL-REFLECT'
 csL.mode = 'COL-REFLECT'
 

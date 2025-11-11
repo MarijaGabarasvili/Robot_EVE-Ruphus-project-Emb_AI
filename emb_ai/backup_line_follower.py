@@ -35,7 +35,7 @@ SEARCH_TURN = 120                # search spin speed
 POLARITY = -1 #motors are reversed
 
 # PID gains
-Kp, Ki, Kd = 2.5, 0.0, 1.0
+Kp, Ki, Kd = 2.0, 0.01, 0.8
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
@@ -102,25 +102,20 @@ try:
         # If neither sensor sees the line, gently search toward last side
         neither_on = (not left_on and not right_on)
         #Test thsi part
+        #This part does 
         if neither_on:
-            if off_l is None:
-                off_l = time.time()
             if mode == "right":
                 set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
             else:
                 set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
             integral = 0.0
             prev_err = 0.0
-            if (time.time() - off_l) > 3.0:
-                print("Line lost, stopping")
-                break
         else:
             set_speeds(left_cmd, right_cmd)
 
         prev_err = err
         prev_t = t
         time.sleep(0.45)
-
 finally:
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")
