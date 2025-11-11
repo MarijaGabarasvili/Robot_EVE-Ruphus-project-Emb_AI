@@ -40,6 +40,8 @@ LOST_SLEEP_START   = 0.12   # starting delay when line is first lost
 LOST_SLEEP_MAX     = 0.75   # maximum delay when line is lost for a long time
 LOST_BACKOFF_RATE  = 0.05   # how fast the delay increases per second
 
+DOUBLE_LINE_TURN = 200 # Fixed turn speed when both sensors see the line
+
 def clamp(v, lo, hi):
     """Limit the value v to the range [lo, hi]."""
     return max(lo, min(hi, v))
@@ -70,6 +72,7 @@ try:
         left_on  = (vL < THRESHOLD_L - DETECT_MARG)
         right_on = (vR < THRESHOLD_R - DETECT_MARG)
         neither_on = (not left_on and not right_on)
+        both_on = left_on and right_on
 
         # Switch which side we follow if necessary
         if left_on and not right_on:
@@ -90,6 +93,28 @@ try:
         else:
             meas = vL
             target_threshold = THRESHOLD_L
+            
+        if both_on:
+            # --- NEW: Forced Turn Logic ---
+            # If both are on, force a turn away from the side we are following
+            # This pulls the main sensor back to the edge quickly
+            
+            # If following right (right sensor is the main one), turn hard right
+            if mode == "right":
+                left_cmd = BASE_SPEED + DOUBLE_LINE_TURN
+                right_cmd = BASE_SPEED - DOUBLE_LINE_TURN
+            # If following left (left sensor is the main one), turn hard left
+            else: # mode == "left"
+                left_cmd = BASE_SPEED - DOUBLE_LINE_TURN
+                right_cmd = BASE_SPEED + DOUBLE_LINE_TURN
+            
+            set_speeds(left_cmd, right_cmd)
+            
+            # Reset the "line lost" timer and PID
+            lost_start = None
+            integral = 0.0
+            prev_err = 0.0
+            sleep_time = TRACK_SLEEP # Use fast sampling when on the line
 
         # If the line is visible by at least one sensor
         if not neither_on:
