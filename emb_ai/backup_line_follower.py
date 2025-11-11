@@ -29,7 +29,7 @@ WHITE_R, BLACK_R = 26, 4        # Jobb szenzor: Fehér (75), Fekete (15)
 THRESHOLD_L = (BLACK_L + WHITE_L) / 2.0  # Bal szenzor célértéke
 THRESHOLD_R = (BLACK_R + WHITE_R) / 2.0  # Jobb szenzor célértéke
 
-DETECT_MARG = 5                  # how close to threshold counts as "on edge"
+DETECT_MARG = 2.5                  # how close to threshold counts as "on edge"
 SEARCH_TURN = 120                # search spin speed
 
 # PID gains
