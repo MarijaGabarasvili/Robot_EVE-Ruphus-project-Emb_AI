@@ -16,7 +16,7 @@ mL.reset()
 mR.reset()
 
 # -------- Base tuning --------
-BASE_SPEED = 150                  # base forward speed
+BASE_SPEED = 250                  # base forward speed
 MAX_SPEED  = 150                  # maximum motor speed
 
 # --- Independent calibration values ---
@@ -31,6 +31,10 @@ SEARCH_TURN = 120                 # turning speed when searching for the line
 
 # PID control gains
 Kp, Ki, Kd = -0.5, 0.0, -1.0
+
+# -------- Corner Handling Settings --------
+CORNER_DETECT_TIME = 0.05 # How long both sensors must see the line to confirm a corner
+CORNER_TURN_DURATION = 0.5 # How long to force a sharp turn after corner is confirmed
 
 # -------- Adaptive sampling settings --------
 # When the line is visible → fast updates
@@ -56,6 +60,12 @@ prev_err = 0.0
 prev_t = time.time()
 lost_start = None  # when the robot last lost the line (None = currently on line)
 
+# Corner state variables
+corner_start_t = None      # Time when both sensors first saw the line
+corner_mode = False        # True if currently executing the corner turn
+corner_dir = None          # Stores the intended turn direction ("right" or "left")
+
+
 # -------- Main loop --------
 try:
     while not btn.any():
@@ -69,57 +79,112 @@ try:
         # Determine if sensors see the dark line
         left_on  = (vL < THRESHOLD_L - DETECT_MARG)
         right_on = (vR < THRESHOLD_R - DETECT_MARG)
+        both_on = (left_on and right_on)       
         neither_on = (not left_on and not right_on)
+    
+        # --- CORNER EXECUTION ---
+        if corner_mode:
+            elapsed_corner = t - corner_start_t
+            
+            if elapsed_corner < CORNER_TURN_DURATION:
+                # Execute the sharp, fixed-time turn
+                if corner_dir == "right":
+                    # Sharp right spin (Right motor reversed)
+                    set_speeds(BASE_SPEED, -BASE_SPEED) 
+                else: 
+                    # Sharp left spin (Left motor reversed)
+                    set_speeds(-BASE_SPEED, BASE_SPEED)
+                
+                # Update time and skip the rest of the loop
+                prev_t = t
+                time.sleep(TRACK_SLEEP)
+                continue
+            else:
+                # Corner turn is over, exit corner mode
+                corner_mode = False
+                corner_start_t = None
 
-        # Switch which side we follow if necessary
-        if left_on and not right_on:
-            if mode != "left":
-                integral = 0.0
-                prev_err = 0.0
-            mode = "left"
-        elif right_on and not left_on:
-            if mode != "right":
-                integral = 0.0
-                prev_err = 0.0
-            mode = "right"
 
-        # Choose which sensor to use for control
-        if mode == "right":
-            meas = vR
-            target_threshold = THRESHOLD_R
-        else:
-            meas = vL
-            target_threshold = THRESHOLD_L
-
-        # If the line is visible by at least one sensor
+        # --- MODE SWITCHING & CORNER DETECTION ---
         if not neither_on:
-            # --- PID control ---
+            
+            # 1. Corner Detection (Both sensors see the line)
+            if both_on:
+                if corner_start_t is None:
+                    # Start timing the 'both on' condition
+                    corner_start_t = t
+                
+                # Check if corner is confirmed
+                if t - corner_start_t >= CORNER_DETECT_TIME:
+                    # Corner Confirmed! Set direction and enter corner mode
+                    corner_mode = True
+                    # The direction to turn is the opposite of the current mode
+                    corner_dir = "left" if mode == "right" else "right"
+                    
+                    # Reset PID state for a fresh start on the new line
+                    integral = 0.0
+                    prev_err = 0.0
+                    
+                    # Jump to the 'continue' above to start the sharp turn immediately
+                    prev_t = t
+                    time.sleep(TRACK_SLEEP)
+                    continue 
+                # If not confirmed, fall through to PID control on the current mode
+
+            else: # Only one sensor sees the line (Normal line following)
+                corner_start_t = None # Reset corner timer if only one sensor is active
+
+                if left_on and not right_on:
+                    if mode != "left":
+                        integral = 0.0
+                        prev_err = 0.0
+                    mode = "left"
+                
+                elif right_on and not left_on:
+                    if mode != "right":
+                        integral = 0.0
+                        prev_err = 0.0
+                    mode = "right"
+
+            # Choose which sensor to use for control (Current mode)
+            if mode == "right":
+                meas = vR
+                target_threshold = THRESHOLD_R
+            else:
+                meas = vL
+                target_threshold = THRESHOLD_L
+
+            # --- PID control (Executed when not in corner_mode and on line) ---
             err = target_threshold - meas
             integral += err * dt
             deriv = (err - prev_err) / dt
             u = Kp * err + Ki * integral + Kd * deriv
 
-            left_cmd  = BASE_SPEED + u
+            left_cmd = BASE_SPEED + u
             right_cmd = BASE_SPEED - u
             set_speeds(left_cmd, right_cmd)
 
-            # Reset the "line lost" timer and use fast sampling
+            # Reset the 'line lost' timer and use fast sampling
             lost_start = None
             sleep_time = TRACK_SLEEP
 
         else:
             # --- Line is lost ---
-            # Spin gently toward the last known side
+            
+            # Reset corner timer (if the robot loses the line while approaching a corner)
+            corner_start_t = None 
+            
+            # Spin gently toward the last known side (using the current mode)
             if mode == "right":
-                set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
+                set_speeds(+SEARCH_TURN, -SEARCH_TURN) # spin right
             else:
-                set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
+                set_speeds(-SEARCH_TURN, +SEARCH_TURN) # spin left
 
-            # Reset PID state (to prevent large jumps)
+            # Reset PID state
             integral = 0.0
             prev_err = 0.0
 
-            # Gradually slow down the sampling rate the longer the line is lost
+            # Gradually slow down the sampling rate (Adaptive sleep)
             if lost_start is None:
                 lost_start = t
                 sleep_time = LOST_SLEEP_START
