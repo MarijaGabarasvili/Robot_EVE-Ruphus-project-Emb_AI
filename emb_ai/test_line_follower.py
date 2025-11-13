@@ -32,16 +32,12 @@ SEARCH_TURN = 120                 # turning speed when searching for the line
 # PID control gains
 Kp, Ki, Kd = -0.5, 0.0, -1.0
 
-# -------- Corner Handling Settings --------
-CORNER_DETECT_TIME = 0.05 # How long both sensors must see the line to confirm a corner
-CORNER_TURN_DURATION = 0.5 # How long to force a sharp turn after corner is confirmed
-
 # -------- Adaptive sampling settings --------
 # When the line is visible → fast updates
 # When the line is lost → slower updates (to save CPU and prevent jitter)
 TRACK_SLEEP        = 0.02   # sampling interval when on the line
 LOST_SLEEP_START   = 0.12   # starting delay when line is first lost
-LOST_SLEEP_MAX     = 0.75   # maximum delay when line is lost for a long time
+LOST_SLEEP_MAX     = 0.50   # maximum delay when line is lost for a long time
 LOST_BACKOFF_RATE  = 0.05   # how fast the delay increases per second
 
 def clamp(v, lo, hi):
@@ -59,12 +55,6 @@ integral = 0.0
 prev_err = 0.0
 prev_t = time.time()
 lost_start = None  # when the robot last lost the line (None = currently on line)
-
-# Corner state variables
-corner_start_t = None      # Time when both sensors first saw the line
-corner_mode = False        # True if currently executing the corner turn
-corner_dir = None          # Stores the intended turn direction ("right" or "left")
-
 
 # -------- Main loop --------
 try:
@@ -160,7 +150,7 @@ try:
             deriv = (err - prev_err) / dt
             u = Kp * err + Ki * integral + Kd * deriv
 
-            left_cmd  = BASE_SPEED + u
+            left_cmd = BASE_SPEED + u
             right_cmd = BASE_SPEED - u
             set_speeds(left_cmd, right_cmd)
 
