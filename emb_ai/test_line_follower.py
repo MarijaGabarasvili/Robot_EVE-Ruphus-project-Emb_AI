@@ -35,6 +35,9 @@ Kp, Ki, Kd = -0.5, 0.0, -1.0
 
 # Sampling time when following the line
 TRACK_SLEEP = 0.02
+# 🔢 Sample only every N-th loop (effective sampling = N * TRACK_SLEEP)
+SAMPLE_SKIP = 3   # try 3; you can change to 2, 4, etc.
+
 
 def clamp(v, lo, hi):
     """Limit the value v to the range [lo, hi]."""
@@ -178,10 +181,16 @@ prev_err = 0.0
 prev_t = time.time()
 
 running = True
+sleep_time = TRACK_SLEEP
+loop_counter = 0
 
 # -------- Main loop --------
 try:
     while running and not btn.any():
+        loop_counter += 1
+        if loop_counter % SAMPLE_SKIP != 0:
+            time.sleep(TRACK_SLEEP)
+            continue
         t = time.time()
         dt = max(1e-3, t - prev_t)
 
