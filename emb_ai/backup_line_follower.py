@@ -21,8 +21,8 @@ MAX_SPEED  = 150                  # maximum motor speed
 
 # --- Independent calibration values ---
 # You must measure these values for your robot (for white and black)
-WHITE_L, BLACK_L = 30, 5          # left sensor calibration
-WHITE_R, BLACK_R = 26, 4          # right sensor calibration
+WHITE_L, BLACK_L = 22, 10          # left sensor calibration
+WHITE_R, BLACK_R = 22, 10          # right sensor calibration
 THRESHOLD_L = (BLACK_L + WHITE_L) / 2.0
 THRESHOLD_R = (BLACK_R + WHITE_R) / 2.0
 
@@ -36,9 +36,13 @@ Kp, Ki, Kd = -0.5, 0.0, -1.0
 # When the line is visible → fast updates
 # When the line is lost → slower updates (to save CPU and prevent jitter)
 TRACK_SLEEP        = 0.02   # sampling interval when on the line
-LOST_SLEEP_START   = 0.12   # starting delay when line is first lost
-LOST_SLEEP_MAX     = 0.75   # maximum delay when line is lost for a long time
-LOST_BACKOFF_RATE  = 0.05   # how fast the delay increases per second
+LOST_SLEEP_START   = 0.3    # 0.12   Delay of the first loop when off the line 
+LOST_SLEEP_MAX     = 1.5   # 0.75 # maximum delay when line is lost for a long time
+LOST_BACKOFF_RATE  = 1.0   # 0.5 # how fast the delay increases per second
+# When off the line, only "act" every Nth loop
+OFFLINE_SKIP = 3           # take a "sample" (update logic) every 3rd loop when off line
+
+
 
 def clamp(v, lo, hi):
     """Limit the value v to the range [lo, hi]."""
@@ -55,6 +59,8 @@ integral = 0.0
 prev_err = 0.0
 prev_t = time.time()
 lost_start = None  # when the robot last lost the line (None = currently on line)
+offline_counter = 0   # counts loops while off the line
+
 
 # -------- Main loop --------
 try:
@@ -65,6 +71,7 @@ try:
         # Read both color sensors
         vL = csL.value()
         vR = csR.value()
+        print("L: {:5.1f}  R: {:5.1f}".format(vL, vR))
 
         # Determine if sensors see the dark line
         left_on  = (vL < THRESHOLD_L - DETECT_MARG)
@@ -109,26 +116,30 @@ try:
 
         else:
             # --- Line is lost ---
-            # Spin gently toward the last known side
-            if mode == "right":
-                set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
-            else:
-                set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
+            offline_counter += 1
 
-            # Reset PID state (to prevent large jumps)
-            integral = 0.0
-            prev_err = 0.0
+            # Only update behavior every OFFLINE_SKIP-th loop
+            if offline_counter % OFFLINE_SKIP == 0:
+                # Spin gently toward the last known side
+                if mode == "right":
+                    set_speeds(+SEARCH_TURN, -SEARCH_TURN)  # spin right
+                else:
+                    set_speeds(-SEARCH_TURN, +SEARCH_TURN)  # spin left
 
-            # Gradually slow down the sampling rate the longer the line is lost
-            if lost_start is None:
-                lost_start = t
-                sleep_time = LOST_SLEEP_START
-            else:
-                lost_secs = t - lost_start
-                sleep_time = min(
-                    LOST_SLEEP_START + LOST_BACKOFF_RATE * lost_secs,
-                    LOST_SLEEP_MAX
-                )
+                # Reset PID state (to prevent large jumps)
+                integral = 0.0
+                prev_err = 0.0
+
+                # Gradually slow down the sampling rate the longer the line is lost
+                if lost_start is None:
+                    lost_start = t
+                    sleep_time = LOST_SLEEP_START
+                else:
+                    lost_secs = t - lost_start
+                    sleep_time = min(
+                        LOST_SLEEP_START + LOST_BACKOFF_RATE * lost_secs,
+                        LOST_SLEEP_MAX
+                    )
 
         prev_err = target_threshold - meas if not neither_on else 0.0
         prev_t = t
@@ -140,4 +151,3 @@ try:
 finally:
     mL.stop(stop_action="brake")
     mR.stop(stop_action="brake")
-    ev3.Sound.speak("Done").wait()
