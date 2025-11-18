@@ -174,17 +174,55 @@ def search_spin_last_side(duration=3.0):
     return False
 
 
+def search_spin_opposite(duration=3.0):
+    """
+    After zigzag fails:
+    - Spin in place toward the last line side (stored in `mode`) for `duration` seconds.
+    - If the line is found, return True.
+    - If not found after duration, return False.
+    """
+    global mode, integral, prev_err
+
+    end = time.time() + duration
+    while time.time() < end and not btn.any():
+        left_on, right_on, neither_on, both_on, vL, vR = line_status()
+        if left_on or right_on:
+            # Found the line while spinning
+            if left_on and not right_on:
+                mode = "left"
+            elif right_on and not left_on:
+                mode = "right"
+            integral = 0.0
+            prev_err = 0.0
+            return True
+
+        # Spin toward the last known side (mode)
+        if mode == "right":
+            set_speeds(-SEARCH_TURN, +SEARCH_TURN)
+        else:
+            set_speeds(+SEARCH_TURN, -SEARCH_TURN)
+
+        time.sleep(TRACK_SLEEP)
+
+    return False
+
 # -------- Initial state --------
 mode = "right"     # which edge we follow ("right" or "left")
 integral = 0.0
 prev_err = 0.0
 prev_t = time.time()
-
+loop_counter = 0
 running = True
+SAMPLE_SKIP = 3   # try 3; you can change to 2, 4, etc.
+sleep_time = TRACK_SLEEP
 
 # -------- Main loop --------
 try:
     while running and not btn.any():
+        loop_counter += 1
+        if loop_counter % SAMPLE_SKIP != 0:
+            time.sleep(TRACK_SLEEP)
+            continue
         t = time.time()
         dt = max(1e-3, t - prev_t)
 
@@ -251,10 +289,17 @@ try:
             if not found:
                 print("Zigzag failed, spinning toward last side...")
                 found_spin = search_spin_last_side(duration=3.5)
+                
                 if not found_spin:
                     print("Line not found after zigzag + spin. Stopping.")
-                    running = False
-                    break
+                    foud_opposite = search_spin_opposite(duration=7.0)
+                    
+                    if not foud_opposite:
+                        print("Also opposite spin failed. Stopping.")
+                        running = False
+                        break
+                    else:
+                        sleep_time = TRACK_SLEEP
                 else:
                     sleep_time = TRACK_SLEEP
             else:
