@@ -21,9 +21,9 @@ mR.reset()
 
 # -------- Base tuning --------
 BASE_SPEED = 250                  # base forward speed (used on straight parts)
-MAX_SPEED  = 150                  # maximum motor speed (absolute)
-MIN_BASE_SPEED = 200              # minimum base speed after ramping
-MAX_BASE_SPEED = 400              # maximum base speed after ramping
+MAX_SPEED  = 300                  # maximum motor speed (absolute)
+MIN_BASE_SPEED = 300              # minimum base speed after ramping
+MAX_BASE_SPEED = 500              # maximum base speed after ramping
 
 # --- Independent calibration values ---
 WHITE_L, BLACK_L = 22, 10         # left sensor calibration
@@ -295,7 +295,7 @@ try:
             base_speed_now = change_speed
 
             if both_on:
-                base_speed_now = max(140, int(base_speed_now * 0.7))
+                base_speed_now = max(200, int(base_speed_now * 0.7))
             elif abs_err > 8:
                 base_speed_now = min(MAX_SPEED + 80, int(change_speed * 0.9))
             elif abs_err > 4:
@@ -312,11 +312,11 @@ try:
             found = search_zigzag(max_cycles=1)
             if not found:
                 print("Zigzag failed, spinning toward last side...")
-                found_spin = search_spin_last_side(duration=3.5)
+                found_spin = search_spin_last_side(duration=4.0)
                 
                 if not found_spin:
                     print("Line not found after zigzag + spin. Stopping.")
-                    foud_opposite = search_spin_opposite(duration=7.0)
+                    foud_opposite = search_spin_opposite(duration=8.0)
                     
                     if not foud_opposite:
                         print("Also opposite spin failed. Stopping.")
